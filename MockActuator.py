@@ -8,11 +8,18 @@ import uuid
 
 class MockActuator:
     def __init__(self,
-                 value_range={"gte": -1, "lte": 1},
-                 initial_value=0):
-        self.uuid = uuid.uuid4()
-        self.range = value_range
-        self.value = initial_value
+                 valueRange={"gte": -1, "lte": 1},
+                 defaultValue=0,
+                 expirationBehavior="dynamic",
+                 _id=None):
+        if _id is None:
+            self.uuid = uuid.uuid4()
+        else:
+            self.uuid = uuid.UUID(_id)
+        self.range = valueRange
+        self.value = defaultValue
+        self.defaultValue = defaultValue
+        self.expirationBehavior = expirationBehavior
 
     def __str__(self):
         obj = {
@@ -22,7 +29,7 @@ class MockActuator:
         }
         return str(obj)
 
-    def _acceptableValue(self, value):
+    def acceptableValue(self, value):
         acceptable = True
         if "gt" in self.range:
             acceptable &= value > self.range["gt"]
@@ -41,7 +48,7 @@ class MockActuator:
 
     @value.setter
     def value(self, value):
-        if self._acceptableValue(value):
+        if self.acceptableValue(value):
             self._value = value
         else:
             # This situation should always be prevented by the interpeter
