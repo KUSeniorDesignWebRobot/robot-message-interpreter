@@ -1,5 +1,6 @@
 """
-Mocks a robotic actuator
+Basic mock class for a robotic actuator
+Does not store significant amounts of metadata about the actuator as this should be managed in the interpreter
 """
 
 import uuid
@@ -8,21 +9,16 @@ import uuid
 class MockActuator:
     def __init__(self,
                  value_range={"gte": -1, "lte": 1},
-                 default_value=0,
-                 behavior="dynamic"):
+                 initial_value=0):
         self.uuid = uuid.uuid4()
         self.range = value_range
-        self.default_value = default_value
-        self.value = default_value
-        self.behavior = behavior
+        self.value = initial_value
 
     def __str__(self):
         obj = {
             "uuid": self.uuid,
             "value": self.value,
-            "range": self.range,
-            "default_value": self.default_value,
-            "behavior": self.behavior
+            "range": self.range
         }
         return str(obj)
 
