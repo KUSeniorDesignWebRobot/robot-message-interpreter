@@ -33,7 +33,7 @@ class StateChangeScheduler:
         :param uuid.UUID actuatorUUID: The UUID of the actuator to perform expiration validation on
         """
         actuatorRecord = self.interpreter.actuatorRecords[actuatorUUID]
-        delaySeconds = actuatorRecord["expires"].timestamp() - time.time() + 0.1
+        delaySeconds = actuatorRecord["expires"].timestamp() - time.time()
         print(delaySeconds)
         threading.Timer(delaySeconds, self.interpreter.expire,
                         [actuatorUUID]).start()

@@ -36,24 +36,26 @@ class Interpreter:
                 float(message_timestamp) + (config.latency_ms / 1000), time.time())
             self.scheduler.scheduleCommandApplication(command)
 
-    def expire(self, actuatorUUID):
+    def expire(self, _id):
         """
         Checks for expiration of an actuator record and takes appropriate action
         """
         expired = False
         self.lock.acquire()
-        actuatorRecord = self.actuatorRecords[actuatorUUID]
-        if actuatorRecord["expires"].timestamp() <= time.time():
-            expired = True
-            if actuatorRecord["expirationBehavior"] == "dynamic":
-                # take no action
-                pass
-            elif actuatorRecord["expirationBehavior"] == "static":
-                actuatorRecord["value"] = actuatorRecord["defaultValue"]
-            else:
-                raise Exception("Undefined expiration behavior %s for actuator %s" % (
-                    actuatorRecord.expirationBehavior, actuatorUUID))
-        self.lock.release()
+        try:
+            actuatorRecord = self.actuatorRecords[_id]
+            if actuatorRecord["expires"].timestamp() <= time.time():
+                expired = True
+                if actuatorRecord["expirationBehavior"] == "dynamic":
+                    # take no action
+                    pass
+                elif actuatorRecord["expirationBehavior"] == "static":
+                    actuatorRecord["value"] = actuatorRecord["defaultValue"]
+                else:
+                    raise Exception("Undefined expiration behavior %s for actuator %s" % (
+                        actuatorRecord.expirationBehavior, _id))
+        finally:
+            self.lock.release()
         if expired:
             self.publish()
 
@@ -61,29 +63,33 @@ class Interpreter:
         """
         Applies a command to the internal record of actuator values
         """
-        actuatorUUID = uuid.UUID(command["actuator_id"])
-        if actuatorUUID in self.actuators:
+        _id = uuid.UUID(command["actuator_id"])
+        if _id in self.actuators:
             # TODO: add value range checking
 
             self.lock.acquire()
-            self.actuatorRecords[actuatorUUID
-                                 ]["value"] = command["value"]
-            expires = datetime.fromtimestamp(
-                command["adjusted_timestamp"] + (command["ttl"] / 1000))
-            self.actuatorRecords[actuatorUUID]["expires"] = expires
-            self.scheduler.scheduleExpiration(actuatorUUID)
-            self.lock.release()
-
-            self.publish()
+            try:
+                print("YO YOU JUST CALLED APPLY")
+                self.actuatorRecords[_id
+                                    ]["value"] = command["value"]
+                expires = datetime.fromtimestamp(
+                    command["adjusted_timestamp"] + (command["ttl"] / 1000))
+                self.actuatorRecords[_id]["expires"] = expires
+                self.scheduler.scheduleExpiration(_id)
+                self.lock.release()
+            finally:
+                self.publish()
         else:
             raise Exception("No matching actuator with uuid %s" %
-                            (actuatorUUID))
+                            (_id))
 
     def publish(self):
         """
         Applies internal record of actuator values to actuators
         """
         self.lock.acquire()
-        for actuatorUUID in self.actuators.keys():
-            self.actuators[actuatorUUID].value = self.actuatorRecords[actuatorUUID]["value"]
-        self.lock.release()
+        try:
+            for _id in self.actuators.keys():
+                self.actuators[_id].value = self.actuatorRecords[_id]["value"]
+        finally:
+            self.lock.release()
