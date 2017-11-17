@@ -41,13 +41,13 @@ def main():
     last = startTimestamp
     proc = []
     for sample in data:
-        # print("Current state:", pp.pformat(interpreter.actuatorRecords))
+        print("Current state:", pp.pformat(interpreter.actuatorRecords))
         time.sleep(sample["timestamp"] - last)
         last = sample["timestamp"]
         message = {"instructions": [sample], "timestamp": time.time()}
-        # print("message: %s" % (pp.pformat(sample)))
+        print("message: %s" % (pp.pformat(sample)))
         proc.append(message)
-        # interpreter.interpret(message)
+        interpreter.interpret(message)
     print(json.dumps(proc))
 
 
