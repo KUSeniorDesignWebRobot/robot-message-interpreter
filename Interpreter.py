@@ -41,8 +41,7 @@ class Interpreter:
         Checks for expiration of an actuator record and takes appropriate action
         """
         expired = False
-        self.lock.acquire()
-        try:
+        with self.lock:
             actuatorRecord = self.actuatorRecords[_id]
             if actuatorRecord["expires"].timestamp() <= time.time():
                 expired = True
@@ -54,8 +53,6 @@ class Interpreter:
                 else:
                     raise Exception("Undefined expiration behavior %s for actuator %s" % (
                         actuatorRecord.expirationBehavior, _id))
-        finally:
-            self.lock.release()
         if expired:
             self.publish()
 
@@ -65,20 +62,13 @@ class Interpreter:
         """
         _id = uuid.UUID(command["actuator_id"])
         if _id in self.actuators:
-            # TODO: add value range checking
-
-            self.lock.acquire()
-            try:
-                print("YO YOU JUST CALLED APPLY")
-                self.actuatorRecords[_id
-                                    ]["value"] = command["value"]
+            with self.lock:
+                self.actuatorRecords[_id]["value"] = command["value"]
                 expires = datetime.fromtimestamp(
                     command["adjusted_timestamp"] + (command["ttl"] / 1000))
                 self.actuatorRecords[_id]["expires"] = expires
-                self.scheduler.scheduleExpiration(_id)
-                self.lock.release()
-            finally:
-                self.publish()
+            self.scheduler.scheduleExpiration(_id)
+            self.publish()
         else:
             raise Exception("No matching actuator with uuid %s" %
                             (_id))
@@ -87,9 +77,6 @@ class Interpreter:
         """
         Applies internal record of actuator values to actuators
         """
-        self.lock.acquire()
-        try:
+        with self.lock: 
             for _id in self.actuators.keys():
                 self.actuators[_id].value = self.actuatorRecords[_id]["value"]
-        finally:
-            self.lock.release()
