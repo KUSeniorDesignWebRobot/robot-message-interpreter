@@ -19,7 +19,16 @@ class Interpreter:
         self.actuatorRecords = {a.uuid: {"value": a.value, "defaultValue": a.defaultValue, "expires": 0,
                                          "expirationBehavior": a.expirationBehavior, "range": a.range} for a in self.actuators.values()}
         self.lock = threading.Lock()
+        self.stopped = False
         self.scheduler = StateChangeScheduler(self, refreshInterval=0.200)
+
+    def stop(self):
+        """
+        Shut down the interpreter safely
+        """
+        with self.lock:
+            self.stopped = True
+        self.scheduler.stop()
 
     def interpret(self, message):
         """
@@ -30,6 +39,12 @@ class Interpreter:
         # TODO: add validation of fields like robot_id, message type etc
         # TODO: add error handling for malformed messages
         # NOTE: message timestamps changed from from ISO8601 to unix epoch timestamp in seconds (with decimal milliseconds)
+        if self.stopped:
+            # reject messages after stop
+            return
+        
+        self.scheduler.showThreads()
+        self.scheduler.joinThreads()
         message_timestamp = message["timestamp"]
         for command in message["instructions"]:
             command["adjusted_timestamp"] = max(

@@ -14,7 +14,32 @@ class StateChangeScheduler:
         self.interpreter = interpreter
         self.refreshInterval = refreshInterval
         self.refreshTarget = time.time()
+        self.threads = []
+        self.lock = threading.Lock()
+        self.stopped = False
         self.intervalRefresh()
+
+    def stop(self):
+        with self.lock:
+            self.stopped = True
+        # wait for all threads to rejoin
+        self.joinThreads(block=True, timeout=None)
+
+    def showThreads(self):
+        print(threading.enumerate())
+
+    def joinThreads(self, block=False, timeout=0):
+        # try to acquire lock, just skips if block is False
+        if self.lock.acquire(blocking=block):   
+            threads = list(self.threads)
+            self.lock.release()
+        else: 
+            return
+
+        for thread in threads:
+            thread.join(timeout=timeout)
+            if not thread.is_alive():
+                self.threads.remove(thread)      
 
     def scheduleCommandApplication(self, command):
         """
@@ -24,8 +49,10 @@ class StateChangeScheduler:
         :param dict command: A command with appended adjusted_timestamp to apply
         """
         delaySeconds = command["adjusted_timestamp"] - time.time()
-        print(delaySeconds)
-        threading.Timer(delaySeconds, self.interpreter.apply, [command]).start()
+        timerthread = threading.Timer(delaySeconds, self.interpreter.apply, [command])
+        timerthread.start()
+        with self.lock:
+            self.threads.append(timerthread)
 
     def scheduleExpiration(self, actuatorUUID):
         """
@@ -34,12 +61,17 @@ class StateChangeScheduler:
         """
         actuatorRecord = self.interpreter.actuatorRecords[actuatorUUID]
         delaySeconds = actuatorRecord["expires"].timestamp() - time.time()
-        print(delaySeconds)
-        threading.Timer(delaySeconds, self.interpreter.expire,
-                        [actuatorUUID]).start()
+        timerthread = threading.Timer(delaySeconds, self.interpreter.expire, [actuatorUUID])
+        timerthread.start()
+        with self.lock:
+            self.threads.append(timerthread)
 
     def intervalRefresh(self):
         self.interpreter.publish()
-        self.refreshTarget += self.refreshInterval
-        delaySeconds = self.refreshTarget - time.time()
-        threading.Timer(delaySeconds, self.intervalRefresh).start()
+        if not self.stopped:
+            self.refreshTarget += self.refreshInterval
+            delaySeconds = self.refreshTarget - time.time()
+            timerthread = threading.Timer(delaySeconds, self.intervalRefresh)
+            timerthread.start()
+            with self.lock:
+                self.threads.append(timerthread)

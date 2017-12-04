@@ -1,9 +1,22 @@
 import json
 import time
 from pprint import PrettyPrinter
-
+import signal
+import sys
 from MockActuator import MockActuator
 from Interpreter import Interpreter
+
+
+def handle_signal(signal, frame):
+        print('You can also enter "q", "quit", or "exit" to quit')
+        print('Exiting...')
+        if interpreter is not None:
+            interpreter.stop()
+        sys.exit(0)
+
+
+signal.signal(signal.SIGINT, handle_signal)
+
 
 
 actuatorList = [
@@ -27,7 +40,10 @@ actuatorList = [
     }
 ]
 
+interpreter = None
+
 def main():
+    global interpreter
     pp = PrettyPrinter()
     actuators = [MockActuator(**a) for a in actuatorList]
     interpreter = Interpreter(actuators)
@@ -35,6 +51,9 @@ def main():
         # interpreter.publish()
         print("Current state:", pp.pformat(interpreter.actuatorRecords))
         messageStr = str(input("message: "))
+        if messageStr in ["q", "quit", "exit"]:
+            interpreter.stop()
+            break
         if messageStr != "":
             message = json.loads(messageStr)
             if "timestamp" not in message:
