@@ -45,6 +45,8 @@ interpreter = None
 def main():
     global interpreter
     pp = PrettyPrinter()
+
+    # shorthand way of creating a list of MockActuators using keyword args specified in actuatorList
     actuators = [MockActuator(**a) for a in actuatorList]
     interpreter = Interpreter(actuators)
     while True:

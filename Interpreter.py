@@ -10,11 +10,11 @@ from datetime import datetime, timedelta
 
 import config
 from StateChangeScheduler import StateChangeScheduler
-from MockActuator import MockActuator
 
 
 class Interpreter:
     def __init__(self, actuators):
+        # takes a list of actuators, and makes it into a dict keyed by uuid
         self.actuators = {a.uuid: a for a in actuators}
         self.actuatorRecords = {a.uuid: {"value": a.value, "defaultValue": a.defaultValue, "expires": 0,
                                          "expirationBehavior": a.expirationBehavior, "range": a.range} for a in self.actuators.values()}
