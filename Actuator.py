@@ -23,6 +23,7 @@ class Actuator:
         self.range = valueRange
         self.value = defaultValue
         self.defaultValue = defaultValue
+        self.speed = speed
         self.expirationBehavior = expirationBehavior
         self.servoMessageManager = ServoMessageManager()
     
