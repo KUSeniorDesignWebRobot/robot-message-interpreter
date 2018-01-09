@@ -19,13 +19,13 @@ class Actuator:
             self.uuid = uuid.uuid4()
         else:
             self.uuid = uuid.UUID(_id)
+        self.servoMessageManager = ServoMessageManager()
         self.channel = channel
         self.range = valueRange
-        self.value = defaultValue
         self.defaultValue = defaultValue
         self.speed = speed
         self.expirationBehavior = expirationBehavior
-        self.servoMessageManager = ServoMessageManager()
+        self.value = defaultValue
     
     def __str__(self):
         obj = {
