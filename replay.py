@@ -49,6 +49,7 @@ def main():
         proc.append(message)
         interpreter.interpret(message)
     print(json.dumps(proc))
+    interpreter.stop()
 
 
 if __name__ == "__main__":
