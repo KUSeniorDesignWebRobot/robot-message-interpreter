@@ -5,37 +5,47 @@ from uuid import UUID
 import json
 from pprint import PrettyPrinter
 
-
-
-
 class CommandMessage:
     def __init__(self, message):
         self.message = ""
+        if isinstance(message, str) and self.__is_json(message):
+            message = json.loads(message)
+        elif not isinstance(message, dict):
+            raise Exception("Input is not a str or a json (dict) object")
+
         if self.__valid(message):
             self.message = message
         else:
             raise Exception("Command Message is not Valid")
 
+    def __str__(self):
+        pp = PrettyPrinter()
+        return (pp.pformat(self.message))
+
+    def __repr__(self):
+        return 'CommandMessage(%r)' % (self.message)
+
     def json(self):
         return self.message
 
-    def print(self):
-        pp = PrettyPrinter()
-        print(pp.pformat(self.message))
+    def str(self):
+        return json.dumps(self.message)
 
-    def __is_json(self, myjson):
+    def __is_json(self, json_string):
         answer = True
         try:
-            json_object = json.loads(myjson)
+            json_object = json.loads(json_string)
         except (ValueError):
+            print("VALUE ERROR")
             answer = False
         except (TypeError):
+            print("TYPE ERROR")
             answer = False
         return answer
 
-    def __versionUUID(self, uuid):
+    def __versionUUID(self, uuid_string):
         try:
-            return UUID(uuid).version
+            return UUID(uuid_string).version
         except ValueError:
             return None
 
@@ -91,16 +101,6 @@ class CommandMessage:
 
     def __valid(self, message):
         valid = True
-
-        ####TO DO - FIX THIS IF-ELSE BLOCK
-        if (valid and self.__is_json(message)):
-            pass
-        else:
-            pass
-            # raise Exception("Message is not a valid JSON.")
-            # valid = False
-            #THE ABOVE SHOULD RAISE AN EXCEPTION WHEN THEMESSAGE IS NOT A VALID json
-            #CURRENTLY THROWS AN ERROR EVEN WITH VALID JSON
 
         if ('message_id' in message):
             version = self.__versionUUID(message['message_id'])
