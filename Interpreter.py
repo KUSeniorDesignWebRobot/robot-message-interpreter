@@ -11,6 +11,8 @@ from datetime import datetime, timedelta
 import config
 from StateChangeScheduler import StateChangeScheduler
 
+class InterpreterException(Exception):
+    pass
 
 class Interpreter:
     def __init__(self, actuators):
@@ -66,7 +68,7 @@ class Interpreter:
                 elif actuatorRecord["expirationBehavior"] == "static":
                     actuatorRecord["value"] = actuatorRecord["defaultValue"]
                 else:
-                    raise Exception("Undefined expiration behavior %s for actuator %s" % (
+                    raise InterpreterException("Undefined expiration behavior %s for actuator %s" % (
                         actuatorRecord.expirationBehavior, _id))
         if expired:
             self.publish()
@@ -85,7 +87,7 @@ class Interpreter:
             self.scheduler.scheduleExpiration(_id)
             self.publish()
         else:
-            raise Exception("No matching actuator with uuid %s" %
+            raise InterpreterException("No matching actuator with uuid %s" %
                             (_id))
 
     def publish(self):
