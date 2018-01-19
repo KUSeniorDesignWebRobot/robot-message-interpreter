@@ -13,6 +13,7 @@ import logging
 import config
 from MockActuator import MockActuator
 from Interpreter import Interpreter
+import CommandMessage as CM
 
 
 class Security:
@@ -25,6 +26,7 @@ class Security:
         self.serverPrivateFile = ""
         self.clientPublicFile = ""
         self.clientPrivateFile = ""
+        self.interpreter = Interpreter()
 
     def generate_cert(self, ):
         """
@@ -60,7 +62,7 @@ class Security:
         context = zmq.Context.instance()
         # starting authenticator for this context
         auth = ThreadAuthenticator(context)
-
+        print("here -1")
         auth.start()
         # telling the authenticator to use certs in the directory
         auth.configure_curve(domain='*', location=self.public_key_dir)
@@ -69,13 +71,13 @@ class Security:
         client_public, client_secret = zmq.auth.load_certificate(client_secret_file)
         server_public_file = os.path.join(self.public_key_dir, "server.key")
         server_public, _ = zmq.auth.load_certificate(server_public_file)
-
+        print("here 1")
         client = context.socket(zmq.REQ)
-
+        print("here 2")
         client.curve_secretkey = client_secret
         client.curve_publickey = client_public
         client.curve_serverkey = server_public
-
+        print("here 5")
         client.connect(config.SERVER_ENDPOINT)
 
         poll = zmq.Poller()
@@ -89,19 +91,29 @@ class Security:
                 ######### EXAMPLE VALUES ########
                 request = {"message_id": "AE6893B6FA78", "message_type": "report",
                            "robot_id": "10385E45745C", "configuration_id": "1212FE080B15",
-                           "session_id": "77AA0D3AE0C7",
+                           "session_id": "77AA0D3AE0C7", "timestamp": "23423.023423",
                            "reports": [{"sensor_id": "D9A84DFFA7CF", "ttl": 1000, "value": 1200030},
                                        {"sensor_id": "B0E2A6D4A688", "ttl": 2000, "value": 3.14159}]}
-                client.send(json.dumps(request))
-
+                # client.send(json.dumps(request))
+                print("GOT HERE - TRY")
+                client.send_json(request)
                 expect_reply = True
                 while expect_reply:
                     socks = dict(poll.poll(config.REQUEST_TIMEOUT))
                     if socks.get(client) == zmq.POLLIN:
 
-                        reply = client.recv_json() # if this does not work, we can do reply = json.loads(reply) in try:
+                         # = client.recv_json() # if this does not work, we can do reply = json.loads(reply) in try:
+                        commandMessage = 0
+                        reply = 0
+                        try:
+                            commandMessage = CM.CommandMessage(client.recv_json())
+                            reply = commandMessage.json()
+                        except:
+                            print("FAILED")
                         if not reply:
+                            print("NO REPLY")
                             break
+                        print("I: Server replied with message (%s)" % reply)
                         logging.debug("I: Server replied with message (%s)" % reply)
                         parsed_dict = {"message_id": reply["message_id"], "message_type": reply["message_type"],
                                        "robot_id": reply["robot_id"], "configuration_id": reply["configuration_id"],
@@ -131,7 +143,8 @@ class Security:
                         client = context.socket(zmq.REQ)
                         client.connect(config.SERVER_ENDPOINT)
                         poll.register(client, zmq.POLLIN)
-                        client.send(request)
+                        print("GOT HERE - ELSE")
+                        client.send_json(request)
             except KeyboardInterrupt:
                 logging.info("END")
                 break
