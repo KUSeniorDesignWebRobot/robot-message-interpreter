@@ -11,7 +11,7 @@ class CommandMessage:
         if isinstance(message, str) and self.__is_json(message):
             message = json.loads(message)
         elif not isinstance(message, dict):
-            raise Exception("Input is not a str or a json (dict) object")
+            raise TypeError("Input is not a str or a json (dict) object")
 
         if self.__valid(message):
             self.message = message
@@ -36,10 +36,8 @@ class CommandMessage:
         try:
             json_object = json.loads(json_string)
         except (ValueError):
-            print("VALUE ERROR")
             answer = False
         except (TypeError):
-            print("TYPE ERROR")
             answer = False
         return answer
 
@@ -60,6 +58,7 @@ class CommandMessage:
             else:
                 raise Exception("Message has invalid actuator ID")
                 valid = False
+
         else:
             raise Exception("Message missing actuator ID")
             valid = False
@@ -187,6 +186,16 @@ class CommandMessage:
             valid = False
 
         return valid
+
+class MessageException(Exception):
+    pass
+
+class MessageTypeError(MessageException):
+    pass
+
+class MessageKeyError(MessageException):
+    pass
+
 
 # # command message example
 # # unique identifier for this message (unique within the scope of this session)
