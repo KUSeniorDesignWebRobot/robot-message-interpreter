@@ -79,11 +79,12 @@ class ServoMessageManager(object):
 
             channel_messages = []
             for message in messages:
-                channel_message = b"#{} P{}".format(message.channel, message.value)
+                channel_message = b"#%d P%d" % (message.channel, message.value)
                 if message.time:
-                    channel_message += b" T{}".format(message.time)
+                    channel_message += b" T%d" % (message.time,)
                 elif message.speed:
-                    channel_message += b" S{}".format(message.speed)
+                    channel_message += b" S%d" % (message.speed,)
+                channel_messages.append(channel_message)
             serial_message = b" ".join(channel_messages) + b"\r"
             self.serial.write(serial_message)
 
