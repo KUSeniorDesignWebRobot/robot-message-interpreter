@@ -20,30 +20,36 @@ class StateChangeScheduler:
         self.intervalRefresh()
 
     def stop(self):
+        print("StateChangeScheduler.stop") #TODO deleteme
         with self.lock:
+            print("\tgot lock") #TODO deleteme
             self.stopped = True
         # wait for all threads to rejoin
+        print("\tjoining threads") #TODO deleteme
         self.joinThreads(block=True, timeout=None)
+        print("\tjoined threads") #TODO deleteme
 
     def showThreads(self):
         print(threading.enumerate())
 
     def joinThreads(self, block=False, timeout=0):
         # try to acquire lock, just skips if block is False
-        if self.lock.acquire(blocking=block):   
+        print("StateChangeScheduler.joinThreads") #TODO deleteme
+        if self.lock.acquire(blocking=block):
+            print("\tgot lock") #TODO deleteme
             threads = list(self.threads)
             self.lock.release()
-        else: 
+        else:
             return
-
+        print("\tjoining ", len(threads), " threads")
         for thread in threads:
             thread.join(timeout=timeout)
             if not thread.is_alive():
-                self.threads.remove(thread)      
+                self.threads.remove(thread)
 
     def scheduleCommandApplication(self, command):
         """
-        Accepts a command with appended "adjusted_timestamp" field and schedules it for 
+        Accepts a command with appended "adjusted_timestamp" field and schedules it for
         processing when the active_timestamp is reached
 
         :param dict command: A command with appended adjusted_timestamp to apply

@@ -28,24 +28,30 @@ class Interpreter:
         """
         Shut down the interpreter safely
         """
+        print("Interpreter.stop") #TODO deleteme
         with self.lock:
+            print("\tgot the lock") #TODO deleteme
             self.stopped = True
+        print("\tstopping scheduler") #TODO deleteme
         self.scheduler.stop()
+        print("\tstopped scheduler") #TODO deleteme
+
 
     def interpret(self, message):
         """
         Accepts a command message in dict form and schedules the message for application
-        adjusted_timestamp of each command is set to the maximum of the message timestamp + 
+        adjusted_timestamp of each command is set to the maximum of the message timestamp +
         enforced latency and the current timestamp
         """
         # TODO: add validation of fields like robot_id, message type etc
         # TODO: add error handling for malformed messages
         # NOTE: message timestamps changed from from ISO8601 to unix epoch timestamp in seconds (with decimal milliseconds)
         if self.stopped:
+            print("\trejecting message because Interpreter.stop was called") #TODO deleteme
             # reject messages after stop
             return
-        
-        self.scheduler.showThreads()
+
+        # self.scheduler.showThreads()
         self.scheduler.joinThreads()
         message_timestamp = message["timestamp"]
         for command in message["instructions"]:
@@ -94,6 +100,6 @@ class Interpreter:
         """
         Applies internal record of actuator values to actuators
         """
-        with self.lock: 
+        with self.lock:
             for _id in self.actuators.keys():
                 self.actuators[_id].value = self.actuatorRecords[_id]["value"]
