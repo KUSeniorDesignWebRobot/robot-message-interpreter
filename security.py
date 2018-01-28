@@ -15,7 +15,6 @@ from MockActuator import MockActuator
 from Interpreter import Interpreter
 import CommandMessage as CM
 
-
 class Security:
     def __init__(self):
         self.baseDir = os.path.dirname(__file__)
@@ -26,7 +25,28 @@ class Security:
         self.serverPrivateFile = ""
         self.clientPublicFile = ""
         self.clientPrivateFile = ""
-        self.interpreter = Interpreter()
+        self.actuatorList = [
+                                {
+                                    "_id": "067c8c59-710a-4c15-8265-b7f1e49b828c",
+                                    "valueRange": {
+                                        "gte": 0,
+                                        "lt": 100
+                                    },
+                                    "expirationBehavior": "static",
+                                    "defaultValue": 0
+                                },
+                                {
+                                    "_id": "e1b97e17-9cd3-4361-9df3-04db98d0c829",
+                                    "valueRange": {
+                                        "gte": 0,
+                                        "lt": 360
+                                    },
+                                    "expirationBehavior": "dynamic",
+                                    "defaultValue": 180
+                                }
+                            ]
+        self.actuators = [MockActuator(**a) for a in self.actuatorList]
+        self.interpreter = Interpreter(self.actuators)
 
     def generate_cert(self, ):
         """
@@ -123,7 +143,7 @@ class Security:
                             parsed_dict["instructions"].append(i)
 
                         # ###### CALL INPTERPRETTER PASSING parsedDict - PLEASE CORRECT IF WRONG, don't know how its structured ######
-                        interpreter.interpret(parsed_dict)
+                        self.interpreter.interpret(parsed_dict)
 
                         retries_left = config.REQUEST_RETRIES
                         expect_reply = False
