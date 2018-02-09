@@ -1,6 +1,7 @@
 import threading
 import queue
 import serial
+import promise
 import time
 
 from ServoMessage import ServoMessage

@@ -48,6 +48,11 @@ class Actuator:
         if "lte" in self.range:
             acceptable &= value <= self.range["lte"]
         return acceptable
+
+    @property
+    def position(self):
+        # TODO: have this query value through ServoMessageManager
+        return self._value
     
     @property
     def value(self):
