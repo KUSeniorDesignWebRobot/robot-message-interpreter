@@ -102,8 +102,8 @@ class ServoMessageManager(object):
             with self.lock:
                 self.threads.append(threading.current_thread())
 
-    def __new__(cls):
+    def __new__(cls, interval=0.01):
         if not ServoMessageManager.instance:
-            ServoMessageManager.instance = ServoMessageManager.__ServoMessageManager()
+            ServoMessageManager.instance = ServoMessageManager.__ServoMessageManager(interval)
         return ServoMessageManager.instance
 
