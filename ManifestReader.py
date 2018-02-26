@@ -8,7 +8,7 @@ class ManifestReader(object):
 
     class __ManifestReader:
 
-        def __init__(self,filepath = "example_messages/initialization/manifest.json"):
+        def __init__(self, filepath):
             self.lock = threading.Lock()
             self.dict = {}
             self.importJson(filepath)
@@ -40,8 +40,5 @@ class ManifestReader(object):
 
     def __new__(cls,filepath = None):
         if not ManifestReader.instance:
-            if filepath is None:
-                ManifestReader.instance = ManifestReader.__ManifestReader()
-            else:
-                ManifestReader.instance = ManifestReader.__ManifestReader(filepath = filepath)
+            ManifestReader.instance = ManifestReader.__ManifestReader(filepath = filepath)
         return ManifestReader.instance

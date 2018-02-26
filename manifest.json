@@ -1,0 +1,15 @@
+{
+    "robot_id": "067c8c59-710a-4c15-8265-b7f1e49b828c",
+    "description": "This is our demo robot manifest",
+    "actuators": [
+    {
+        "description": "left shoulder rotation",
+        "_id": "e1b97e17-9cd3-4361-9df3-04db98d0c829",
+        "valueRange": {
+            "gte": 0,
+            "lt": 100
+        },
+        "expirationBehavior": "static",
+        "defaultValue": 0
+    }
+]}
