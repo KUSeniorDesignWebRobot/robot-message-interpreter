@@ -13,7 +13,7 @@ interpreter = None
 
 # TODO: use manifest reader to import manifest and generate list of actuators
 manifest = ManifestReader('manifest.json')
-manifest.setVar('testing', True)
+#manifest.setVar('testing', True)
 
 actuator_specifications = manifest.getManifestValue('actuators')
 actuators = []
