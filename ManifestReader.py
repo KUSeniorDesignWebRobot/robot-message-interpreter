@@ -26,7 +26,6 @@ class ManifestReader(object):
             if key in self.dict.keys():
                 return self.dict[key]
             else:
-                print("Key not in dict!!")
                 return None
 
         def getManifestValue(self,key):
@@ -38,7 +37,10 @@ class ManifestReader(object):
 
 
 
-    def __new__(cls,filepath = None):
+    def __new__(cls, filepath = None):
         if not ManifestReader.instance:
-            ManifestReader.instance = ManifestReader.__ManifestReader(filepath = filepath)
+            if filepath:
+                ManifestReader.instance = ManifestReader.__ManifestReader(filepath = filepath)
+            else:
+                raise Exception("Manifest requires filepath on first time initialization")
         return ManifestReader.instance

@@ -8,6 +8,7 @@ import uuid
 
 class MockActuator:
     def __init__(self,
+                 channel=None,
                  valueRange={"gte": -1, "lte": 1},
                  defaultValue=0,
                  expirationBehavior="dynamic",
