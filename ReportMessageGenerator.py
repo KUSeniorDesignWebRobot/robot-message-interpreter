@@ -22,6 +22,8 @@ class ReportMessageGenerator(object):
             t = threading.Thread(target=self.__consume)
             self.threads.append(t)
             t.start()
+            # self.current_message #this is the current message.
+            self.is_fresh = False #this is true if it is a new message
 
         def stop(self):
             self.queue.join()
@@ -44,6 +46,7 @@ class ReportMessageGenerator(object):
                     self.threads.remove(thread)
 
         def __consume(self):
+            print("consume")
             reports = []
             # wait until the queue isn't empty
             while not self.queue.empty():
@@ -51,6 +54,8 @@ class ReportMessageGenerator(object):
                 self.queue.task_done()
             if reports:
                 message = self.generateReportMessage(reports)
+                while(self.is_fresh):
+                    pass #wait for the message to be taken by the messenger
                 self.sendReportMessage(message)
             self.joinThreads()
 
@@ -77,6 +82,8 @@ class ReportMessageGenerator(object):
         def sendReportMessage(self, message):
             message["message_id"] = str(message["message_id"])
             print(json.dumps(message))
+            self.current_message = message
+            self.is_fresh = True
             # TODO hook this up to some type of sender @paul
 
         def enqueue(self, report):
@@ -90,7 +97,7 @@ class ReportMessageGenerator(object):
             self.queue.put(report)
             with self.lock:
                 self.threads.append(threading.current_thread())
-    
+
     def __new__(cls, interval=0.05):
         if not ReportMessageGenerator.instance:
             ReportMessageGenerator.instance = ReportMessageGenerator.__ReportMessageGenerator(interval=interval)

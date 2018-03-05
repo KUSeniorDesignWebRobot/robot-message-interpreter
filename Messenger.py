@@ -12,6 +12,7 @@ from MockActuator import MockActuator
 from Interpreter import Interpreter
 import CommandMessage as CM
 import AcknowledgementMessage as AM
+import ReportMessageGenerator as RMG
 
 class OfflineServerError(Exception):
     pass
@@ -69,6 +70,9 @@ class Messenger:
         print("SEND START")
         if(self.send_message_type == "command"):
             self.client.send_json(CM.CommandMessage(message).json())
+        elif(self.send_message_type == "report"):
+            self.client.send_json(message)
+            # self.client.send_json(RM.ReportMessage(message).json())
         elif(self.send_message_type == "acknowledgement"):
             self.client.send_json(AM.AcknowledgementMessage(message).json())
         print("SEND END")
