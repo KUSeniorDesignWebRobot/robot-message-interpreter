@@ -1,7 +1,7 @@
 """
 Interpreter for command messages
 """
-
+import logging
 import uuid
 import time
 import threading

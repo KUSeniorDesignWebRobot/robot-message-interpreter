@@ -1,6 +1,7 @@
 import json
 import time
 import sys
+import logging
 from pprint import PrettyPrinter
 
 from MockActuator import MockActuator

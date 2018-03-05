@@ -1,5 +1,6 @@
 from CommandMessage import CommandMessage as cm
 import json
+import logging
 from pprint import PrettyPrinter
 pp = PrettyPrinter()
 

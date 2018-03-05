@@ -1,6 +1,7 @@
 import threading
 import queue
 import serial
+import logging
 import promise
 import time
 

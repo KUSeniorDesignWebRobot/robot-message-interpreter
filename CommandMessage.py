@@ -1,6 +1,6 @@
 # Author: Paul McELroy
 # Class for Command Messages
-
+import logging
 from uuid import UUID
 import json
 from pprint import PrettyPrinter

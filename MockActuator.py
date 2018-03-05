@@ -2,7 +2,7 @@
 Basic mock class for a robotic actuator
 Does not store significant amounts of metadata about the actuator as this should be managed in the interpreter
 """
-
+import logging
 import uuid
 
 
