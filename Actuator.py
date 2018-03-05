@@ -9,12 +9,12 @@ from ServoMessageManager import ServoMessageManager
 
 class Actuator:
     def __init__(self,
-                 channel,
+                 channel=None,
                  valueRange={"gte": -1, "lte": 1},
                  defaultValue=0,
                  expirationBehavior="dynamic",
                  _id=None,
-                 speed=None):
+                 speed=1000):
         if _id is None:
             self.uuid = uuid.uuid4()
         else:
@@ -65,7 +65,7 @@ class Actuator:
             if not hasattr(self, "_value") or self._value != value:
                 self._value = value
                 message = self.servoMessageManager.getMessage()
-                message.build(self.channel, self._value, speed=self.speed)
+                message.build(channel=self.channel, value=self._value, speed=self.speed)
                 message.send()
         else:
             # TODO: Interpreter should handle exception being thrown

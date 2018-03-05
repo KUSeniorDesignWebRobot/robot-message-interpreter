@@ -5,6 +5,7 @@ import promise
 import time
 
 from ServoMessage import ServoMessage
+from ManifestReader import ManifestReader
 
 class ServoMessageManager(object):
     """
@@ -16,11 +17,16 @@ class ServoMessageManager(object):
 
     class __ServoMessageManager:
         def __init__(self, interval=0.01):
+            self.manifestReader = ManifestReader()
+            self.testing = self.manifestReader.getVar('testing')
+
             self.lock = threading.Lock()
             self.queue = queue.Queue()
-            self.serial = serial.Serial('/dev/ttyUSB0')
-            if self.serial is None:
-                raise IOError("Serial Connection Failed!")
+
+            if not self.testing:
+                self.serial = serial.Serial('/dev/ttyUSB0')
+                if self.serial is None:
+                    raise IOError("Serial Connection Failed!")
             self.stopped = False
             self.target = time.time()
             self.interval = interval
@@ -52,9 +58,11 @@ class ServoMessageManager(object):
         def __consume(self):
             messages = []
             # wait until the queue isn't empty
-            while not self.queue.empty():
-                messages.append(self.queue.get_nowait())
-                self.queue.task_done()
+            with self.lock:
+                while not self.queue.empty():
+                    message = self.queue.get_nowait()
+                    messages.append(message)
+                    self.queue.task_done()
             if messages:
                 self.sendMessages(messages)
             self.joinThreads()
@@ -87,7 +95,9 @@ class ServoMessageManager(object):
                     channel_message += b" S%d" % (message.speed,)
                 channel_messages.append(channel_message)
             serial_message = b" ".join(channel_messages) + b"\r"
-            self.serial.write(serial_message)
+
+            if not self.testing:
+                self.serial.write(serial_message)
 
 
         def enqueue(self, message):

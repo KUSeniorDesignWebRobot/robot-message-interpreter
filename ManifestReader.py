@@ -8,7 +8,7 @@ class ManifestReader(object):
 
     class __ManifestReader:
 
-        def __init__(self,filepath = "example_messages/initialization/manifest.json"):
+        def __init__(self, filepath):
             self.lock = threading.Lock()
             self.dict = {}
             self.importJson(filepath)
@@ -26,7 +26,6 @@ class ManifestReader(object):
             if key in self.dict.keys():
                 return self.dict[key]
             else:
-                print("Key not in dict!!")
                 return None
 
         def getManifestValue(self,key):
@@ -38,10 +37,10 @@ class ManifestReader(object):
 
 
 
-    def __new__(cls,filepath = None):
+    def __new__(cls, filepath = None):
         if not ManifestReader.instance:
-            if filepath is None:
-                ManifestReader.instance = ManifestReader.__ManifestReader()
-            else:
+            if filepath:
                 ManifestReader.instance = ManifestReader.__ManifestReader(filepath = filepath)
+            else:
+                raise Exception("Manifest requires filepath on first time initialization")
         return ManifestReader.instance
