@@ -2,10 +2,13 @@ import json
 import time
 from pprint import PrettyPrinter
 import signal
+import logging
+import argparse
 import sys
 from MockActuator import MockActuator
 from Interpreter import Interpreter
 
+_LOG_LEVEL_STRINGS = ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG']
 
 def handle_signal(signal, frame):
         print('You can also enter "q", "quit", or "exit" to quit')
@@ -17,6 +20,16 @@ def handle_signal(signal, frame):
 
 signal.signal(signal.SIGINT, handle_signal)
 
+def _log_level_string_to_int(log_level_string):
+    if not log_level_string in _LOG_LEVEL_STRINGS:
+        message = 'invalid choice: {0} (choose from {1})'.format(log_level_string, _LOG_LEVEL_STRINGS)
+        raise argparse.ArgumentTypeError(message)
+
+    log_level_int = getattr(logging, log_level_string, logging.INFO)
+    # check the logging log_level_choices have not changed from our expected values
+    assert isinstance(log_level_int, int)
+
+    return log_level_int
 
 
 actuatorList = [
@@ -43,6 +56,21 @@ actuatorList = [
 interpreter = None
 
 def main():
+    # pass in log level via --log-level= (DEBUG or INFO or WARNING or ERROR)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--log-level=',
+                    default='DEBUG',
+                    dest='log_level',
+                    type=_log_level_string_to_int,
+                    nargs='?',
+                    help='Set the logging output level. {0}'.format(_LOG_LEVEL_STRINGS))
+    parsed_args = parser.parse_args()
+    logging.basicConfig(filename='\var\log\robot.log', format='%(asctime)s:%(levelname)s:%(message)s', level=parsed_args.log_level)
+    logging.debug('Started')
+    logging.info('Started')
+    logging.warning('Started')
+    logging.error('Started')
+    logging.critical('Started')
     global interpreter
     pp = PrettyPrinter()
 
@@ -60,6 +88,11 @@ def main():
             if "timestamp" not in message:
                 message["timestamp"] = time.time()
             interpreter.interpret(message)
+    logging.debug('Finished')
+    logging.info('Finished')
+    logging.warning('Finished')
+    logging.error('Finished')
+    logging.critical('Finished')
 
 
 if __name__ == "__main__":
