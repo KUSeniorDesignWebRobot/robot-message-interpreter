@@ -1,6 +1,7 @@
 import threading
 import json
 import io
+import logging
 
 class ManifestReader(object):
 

@@ -1,6 +1,6 @@
 # Author: Paul McELroy
 # Class for Command Messages
-
+import logging
 from uuid import UUID
 import json
 from pprint import PrettyPrinter
@@ -12,11 +12,12 @@ class CommandMessage:
             message = json.loads(message)
         elif not isinstance(message, dict):
             raise Exception("Input is not a str or a json (dict) object")
-
+            logging.error("Input is not a str or a json (dict) object")
         if self.__valid(message):
             self.message = message
         else:
             raise Exception("Command Message is not Valid")
+            logging.error("Command Message is not Valid")
 
     def __str__(self):
         pp = PrettyPrinter()
@@ -59,9 +60,11 @@ class CommandMessage:
                 pass
             else:
                 raise Exception("Message has invalid actuator ID")
+                logging.error("Message has invalid actuator ID")
                 valid = False
         else:
             raise Exception("Message missing actuator ID")
+            logging.error("Message missing actuator ID")
             valid = False
 
         if (valid and 'ttl' in instruction):
@@ -71,8 +74,10 @@ class CommandMessage:
                 pass
             else:
                 raise Exception("Message has invalid ttl type")
+                logging.error("Message has invalid ttl type")
         else:
             raise Exception("Message missing ttl")
+            logging.error("Message missing ttl")
             valid = False
 
         if (valid and 'type' in instruction):
@@ -83,8 +88,10 @@ class CommandMessage:
                 pass
             else:
                 raise Exception("Instruction has invalid message type")
+                logging.error("Instruction has invalid message type")
         else:
             raise Exception("Instruction missing message type")
+            logging.error("Instruction missing message type")
             valid = False
 
         if (valid and 'value' in instruction):
@@ -94,8 +101,10 @@ class CommandMessage:
                 pass
             else:
                 raise Exception("Instruction has invalid value type")
+                logging.error("Instruction has invalid value type")
         else:
             raise Exception("Instruction missing value")
+            logging.error("Instruction missing value")
             valid = False
         return valid
 
@@ -110,9 +119,11 @@ class CommandMessage:
                 pass
             else:
                 raise Exception("Message has invalid message ID")
+                logging.error("Message has invalid message ID")
                 valid = False
         elif(valid):
             raise Exception("Message missing message ID")
+            logging.error("Message missing message ID")
             valid = False
 
         if (valid and 'message_type' in message):
@@ -134,9 +145,11 @@ class CommandMessage:
                 pass
             else:
                 raise Exception("Message has invalid robot ID")
+                logging.error("Message has invalid robot ID")
                 valid = False
         elif(valid):
             raise Exception("Message missing robot ID")
+            logging.error("Message missing robot ID")
             valid = False
 
         if (valid and 'configuration_id' in message):
@@ -146,9 +159,11 @@ class CommandMessage:
                 pass
             else:
                 raise Exception("Message has invalid configuration ID")
+                logging.error("Message has invalid configuration ID")
                 valid = False
         elif(valid):
             raise Exception("Message missing configuration ID")
+            logging.error("Message missing configuration ID")
             valid = False
 
         if (valid and 'session_id' in message):
@@ -158,9 +173,11 @@ class CommandMessage:
                 pass
             else:
                 raise Exception("Message has invalid session ID")
+                logging.error("Message has invalid session ID")
                 valid = False
         elif(valid):
             raise Exception("Message missing session ID")
+            logging.error("Message missing session ID")
             valid = False
 
         if (valid and 'timestamp' in message):
@@ -170,8 +187,10 @@ class CommandMessage:
                 pass
             else:
                 raise Exception("Message has invalid timestamp type")
+                logging.error("Message has invalid timestamp type")
         elif(valid):
             raise Exception("Message missing timestamp")
+            logging.error("Message missing timestamp")
             valid = False
 
         if (valid and 'instructions' in message):
@@ -182,8 +201,10 @@ class CommandMessage:
                     pass
                 else:
                     raise Exception("Some instructions in message are invalid.")
+                    logging.error("Some instructions in message are invalid.")
         elif(valid):
             raise Exception("Message has invalid instruction type.")
+            loggin.error("Message has invalid instruction type.")
             valid = False
 
         return valid

@@ -4,6 +4,7 @@ from Interpreter import Interpreter
 from MockActuator import MockActuator
 import time
 from uuid import UUID
+import logging
 import threading
 from ReportMessageGenerator import ReportMessageGenerator
 

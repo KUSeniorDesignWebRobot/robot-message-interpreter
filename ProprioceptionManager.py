@@ -2,7 +2,7 @@ import uuid
 import serial
 import threading
 import time
-
+import logging
 from ServoMessageManager import ServoMessageManager
 
 
