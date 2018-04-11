@@ -6,7 +6,7 @@ import zmq.auth
 from zmq.auth.thread import ThreadAuthenticator
 import json
 import logging
-
+import sys
 import config
 from MockActuator import MockActuator
 from Interpreter import Interpreter
@@ -14,6 +14,16 @@ import CommandMessage as CM
 import AcknowledgementMessage as AM
 import ReportMessageGenerator as RMG
 
+#block prints during runtime?
+block = True
+
+# Disable
+def blockPrint():
+    sys.stdout = open(os.devnull, 'w')
+
+# Restore
+def enablePrint():
+    sys.stdout = sys.__stdout__
 
 #Example Termination Message
 tM = {
@@ -64,10 +74,13 @@ class Messenger:
 
         self.poll = zmq.Poller()
         self.poll.register(self.client, zmq.POLLIN | zmq.POLLOUT)
+        if(block):
+            blockPrint()
         return self
 
 
     def __exit__(self, exception_type, exception_value, traceback):
+        enablePrint()
         if(self.is_current(1)):
             print("Was current")
             self.client.recv_json()
@@ -106,6 +119,7 @@ class Messenger:
             print("SEND END")
 
     def try_resend(self, message, retries_left):
+        enablePrint()
         print("RESEND START")
         retries_left -= 1
         logging.info("W: No response from server, retrying…")
@@ -125,6 +139,8 @@ class Messenger:
             self.poll.register(self.client, zmq.POLLIN | zmq.POLLOUT)
             self.send(message)
             print("RESEND END")
+        if(block):
+            blockPrint()
         return retries_left
 
     def send_termination(self):
