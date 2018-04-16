@@ -52,7 +52,7 @@ def commandMessageManager(actuatorList):
                 # time.sleep(10)
                 ######### EXAMPLE VALUES ########
                 request = {"message_id": last_message_id, "message_type": "acknowledgement","timestamp": last_timestamp}
-
+                logging.info("cmd msg manger request msg with id %s with timestamp %f", last_message_id, last_timestamp)
                 # client.send(json.dumps(request))
                 # client.send_json(request)
                 print("SENDING Acknowledgement")
@@ -66,10 +66,13 @@ def commandMessageManager(actuatorList):
                             reply = m.recv()
                         except:
                             print("FAILED")
+                            logging.error("cmd msg amanger failed")
                         if not reply:
                             print("NO REPLY")
+                            logging.error("cmd msg manager has no reply")
                             break
                         print("I: Server replied with message (%s)" % reply)
+                        logging.info("server replied with message %s",reply)
                         last_timestamp = time.time()
                         last_message_id = reply["message_id"]
                         if(reply["message_type"] == "command"):
@@ -108,6 +111,7 @@ def commandMessageManager(actuatorList):
                 # if (expect_reply):
                 #     print("HOLD ON, I'M EXPECTING A REPLY REAL QUICK!")
                 #     reply = m.recv()
+                logging.info("cmd msg manager recieved keyboard interrupt")
                 print("Exiting")
                 retries_left = 0
         # m.send_termination()
@@ -139,10 +143,13 @@ def reportMessageManager():
                         reply = m.recv()
                     except:
                         print("FAILED")
+                        logging.error("report msg manager failed to send report")
                     if not reply:
+                        logging.error("report msg manager got no reply from server")
                         print("NO REPLY")
                         break
                     print("I: Server replied with message (%s)" % reply)
+                    logging.info("Server replied to report msg generator with %s", reply)
                     last_timestamp = time.time()
                     last_message_id = reply["message_id"]
                     # parsed_dict = {"message_id": reply["message_id"], "message_type": reply["message_type"],

@@ -28,6 +28,7 @@ class ServoMessageManager(object):
                 self.serial = serial.Serial('/dev/ttyUSB0')
                 if self.serial is None:
                     raise IOError("Serial Connection Failed!")
+                          logging.error("Serial Connection Failed!")
             self.stopped = False
             self.target = time.time()
             self.interval = interval
@@ -90,10 +91,13 @@ class ServoMessageManager(object):
             channel_messages = []
             for message in messages:
                 channel_message = b"#%d P%d" % (message.channel, message.value)
+                logging.info("message sent on channel %d with value %d", message.channel, message.value)
                 if message.time:
                     channel_message += b" T%d" % (message.time,)
+                    logging.info("message sent at time %d", message.time)
                 elif message.speed:
                     channel_message += b" S%d" % (message.speed,)
+                    logging.info("message speed at %d", message.speed)
                 channel_messages.append(channel_message)
             serial_message = b" ".join(channel_messages) + b"\r"
 

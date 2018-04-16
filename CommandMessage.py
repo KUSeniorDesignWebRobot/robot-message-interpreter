@@ -38,9 +38,11 @@ class CommandMessage:
             json_object = json.loads(json_string)
         except (ValueError):
             print("VALUE ERROR")
+            logging.error("Value from JSON invalid!!")
             answer = False
         except (TypeError):
             print("TYPE ERROR")
+            logging.error("Type error from JSON!!")
             answer = False
         return answer
 
@@ -56,11 +58,11 @@ class CommandMessage:
         if (valid and 'actuator_id' in instruction):
             version = self.__versionUUID(instruction['actuator_id'])
             if version:
-                # print("Message has valid actuator ID")
+                logging.info("Message has valid actuator ID")
                 pass
             else:
                 raise Exception("Message has invalid actuator ID")
-                logging.error("Message has invalid actuator ID")
+                logging.error("Message has invalid actuator ID ")
                 valid = False
         else:
             raise Exception("Message missing actuator ID")
@@ -70,7 +72,7 @@ class CommandMessage:
         if (valid and 'ttl' in instruction):
             valid = isinstance(instruction['ttl'], int) or isinstance(instruction['ttl'], float)
             if valid:
-                # print("Message has valid ttl")
+                logging.info("Message has valid ttl")
                 pass
             else:
                 raise Exception("Message has invalid ttl type")
@@ -84,7 +86,7 @@ class CommandMessage:
             mType = instruction['type']
             valid  = mType  == 'dynamic' or mType  ==  'static'
             if valid:
-                # print("Instruction has valid  type")
+                logging.info("Instruction has valid  type")
                 pass
             else:
                 raise Exception("Instruction has invalid message type")
@@ -97,7 +99,7 @@ class CommandMessage:
         if (valid and 'value' in instruction):
             valid = isinstance(instruction['value'], int) or isinstance(instruction['value'], float)
             if valid:
-                # print("Instruction has valid value")
+                logging.info("Instruction has valid value")
                 pass
             else:
                 raise Exception("Instruction has invalid value type")
@@ -113,9 +115,9 @@ class CommandMessage:
 
         if ('message_id' in message):
             version = self.__versionUUID(message['message_id'])
-            # print(version)
+            logging.info(version)
             if version:
-                # print("Message has valid message ID")
+                logging.info("Message has valid message ID")
                 pass
             else:
                 raise Exception("Message has invalid message ID")
@@ -141,7 +143,7 @@ class CommandMessage:
         if (valid and 'robot_id' in message):
             version = self.__versionUUID(message['robot_id'])
             if version:
-                # print("Message has valid robot ID")
+                logging.info("Message has valid robot ID")
                 pass
             else:
                 raise Exception("Message has invalid robot ID")
@@ -155,7 +157,7 @@ class CommandMessage:
         if (valid and 'configuration_id' in message):
             version = self.__versionUUID(message['configuration_id'])
             if version:
-                # print("Message has valid configuration ID")
+                logging.info("Message has valid configuration ID")
                 pass
             else:
                 raise Exception("Message has invalid configuration ID")
@@ -169,7 +171,7 @@ class CommandMessage:
         if (valid and 'session_id' in message):
             version = self.__versionUUID(message['session_id'])
             if version:
-                # print("Message has valid session ID")
+                loggin.info("Message has valid session ID")
                 pass
             else:
                 raise Exception("Message has invalid session ID")
@@ -183,7 +185,7 @@ class CommandMessage:
         if (valid and 'timestamp' in message):
             valid = isinstance(message['timestamp'], float)
             if valid:
-                # print("Message has valid timestamp")
+                logging.info("Message has valid timestamp")
                 pass
             else:
                 raise Exception("Message has invalid timestamp type")

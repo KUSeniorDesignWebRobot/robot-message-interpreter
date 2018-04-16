@@ -22,27 +22,35 @@ class StateChangeScheduler:
 
     def stop(self):
         print("StateChangeScheduler.stop") #TODO deleteme
+        logging.info("state change scheduler stopped")
         with self.lock:
             print("\tgot lock") #TODO deleteme
+            logging.info("state change scheduler got lock")           
             self.stopped = True
         # wait for all threads to rejoin
         print("\tjoining threads") #TODO deleteme
+        logging.info("state change scheduler joining threads")
         self.joinThreads(block=True, timeout=None)
         print("\tjoined threads") #TODO deleteme
+        logging.info("state change scheduler joined threads")
 
     def showThreads(self):
         print(threading.enumerate())
+        logging.info("active threads %s",threading.enumerate() )
 
     def joinThreads(self, block=False, timeout=0):
         # try to acquire lock, just skips if block is False
         print("StateChangeScheduler.joinThreads") #TODO deleteme
+        logging.info("StateChangeScheduler.joinThreads")
         if self.lock.acquire(blocking=block):
             print("\tgot lock") #TODO deleteme
+            logging.info("state change scheduler got lock")
             threads = list(self.threads)
             self.lock.release()
         else:
             return
         print("\tjoining ", len(threads), " threads")
+        logging.info("joining %i threads", len(threads))
         for thread in threads:
             thread.join(timeout=timeout)
             if not thread.is_alive():
