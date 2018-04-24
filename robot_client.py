@@ -37,7 +37,7 @@ def commandMessageManager(actuatorList):
     #this valid UUID of zeros indicates the opening of the connection to the robot
     #TODO The all-zero UUID is actually invalid.  Need to designate a dummy default UUID value.
     #Maybe just random like a normal message?
-    last_message_id = "e1b97e17-9cd3-4361-9df3-04db98d0c829"
+    last_message_id = "f1b97e17-9cd3-4361-9df3-04db98d0c829"
     last_timestamp = time.time()
     with Messenger("command", "acknowledgement") as m:
         retries_left = config.REQUEST_RETRIES
@@ -62,6 +62,7 @@ def commandMessageManager(actuatorList):
                     if m.is_current():
                         commandMessage = 0
                         reply = 0
+                        print("BEFORE", reply)
                         try:
                             reply = m.recv()
                         except:
@@ -69,6 +70,7 @@ def commandMessageManager(actuatorList):
                         if not reply:
                             print("NO REPLY")
                             break
+                        print("AFTER", reply)
                         print("I: Server replied with message (%s)" % reply)
                         last_timestamp = time.time()
                         last_message_id = reply["message_id"]

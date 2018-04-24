@@ -15,7 +15,7 @@ import AcknowledgementMessage as AM
 import ReportMessageGenerator as RMG
 
 #block prints during runtime?
-block = True
+block = False
 
 # Disable
 def blockPrint():
@@ -100,6 +100,7 @@ class Messenger:
         else:
             print("SEND START")
             print("MESSAGE TYPE IS ", message["message_type"])
+            print("Message being sent: \n", message)
             try:
                 if(message["message_type"] == "termination"):
                     self.client.send_json(message, zmq.NOBLOCK)
@@ -159,6 +160,7 @@ class Messenger:
             message = AM.AcknowledgementMessage(self.client.recv_json())
         reply = message.json()
         logging.debug("I: Server replied with message (%s)" % reply)
+        print("Received Message: \n", reply)
         print("RECEIVE END")
         return reply
 
@@ -166,12 +168,13 @@ class Messenger:
         print("IS_CURRENT START")
         socks = dict(self.poll.poll(timeout))
         status = socks.get(self.client) == zmq.POLLIN
-        print("IS_CURRENT END")
+        print("IS_CURRENT END", status)
+        # status = True
         return status
 
     def is_ready_to_send(self, timeout=config.REQUEST_TIMEOUT):
         print("is_ready_to_send START")
         socks = dict(self.poll.poll(timeout))
         status = socks.get(self.client) == zmq.POLLOUT
-        print("is_ready_to_send END")
+        print("is_ready_to_send END", status)
         return status
