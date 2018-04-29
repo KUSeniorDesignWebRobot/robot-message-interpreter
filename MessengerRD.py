@@ -4,7 +4,7 @@ import os
 import zmq
 import zmq.auth
 from zmq.auth.thread import ThreadAuthenticator
-# import json
+import json
 import logging
 import sys
 import config
@@ -16,6 +16,7 @@ import AcknowledgementMessage as AM
 import time
 import threading
 import uuid
+from RepeatingTimer import RepeatingTimer
 
 # block prints during runtime?
 block = False
@@ -43,54 +44,27 @@ tM = {
 class OfflineServerError(Exception):
     pass
 
+# lastMessageReceivedTimestamp = time.time()
 
 class Messenger:
-    def checkAlive(self):
-        lastTime = self.lastMessageReceivedTimestamp
-        timeNow = time.time()
-        timeout = 2.5
-        print("TIMES:(" + str(lastTime) + ", " + str(timeNow) + ", " + str(timeout) + ")")
-        if timeNow - lastTime > timeout:
-            print("Error: connection timeout.")
-            self.cleanup();
-
     def __init__(self, recv_message_type, send_message_type, manifest):
-        # self.recv_message_type = recv_message_type
-        # self.send_message_type = send_message_type
-        # self.baseDir = os.path.dirname(__file__)
-        # self.client_secret_file = zmq.auth.create_certificates(".", manifest['robot_id'])[1]
-        # self.cert_dir = os.path.join(self.baseDir, 'certs')
-        # self.public_key_dir = os.path.join(self.baseDir, 'public_keys')
-        # self.secret_key_dir = os.path.join(self.baseDir, 'private_keys')
-        # self.server_public_file = os.path.join(self.public_key_dir, "server.key")
-        # self.serverPrivateFile = ""
-        # self.clientPublicFile = ""
-        # self.client_secret_file = os.path.join(self.secret_key_dir, "client.key_secret")
-        # self.client_secret_file = os.path.join(self.secret_key_dir, "client.key_secret")
-        # self.client_public, self.client_secret = "", ""
-        # self.server_public_file = os.path.join(self.public_key_dir, "server.key")
-        # self.server_public = ""
         self.context = None
         self.auth = None
         self.client = None
         self.server_side_termination = False
         self.connected = False
-        self.lastMessageReceivedTimestamp = 0
-        self.aliveTimer = threading.Timer(2.0, self.checkAlive)
+        # self.lastMessageReceivedTimestamp = 0
         self.manifest = manifest
+        self.aliveTimer = RepeatingTimer(2.0, self.checkAlive)
 
     def __enter__(self):
         self.context = zmq.Context.instance()
         self.auth = ThreadAuthenticator(self.context)
         self.auth.start()
-        # telling the authenticator to use certs in the directory
+        # telling the authenticator to use the robots domain; we will randomly generate the keypair
         self.auth.configure_curve(domain='robots', location=zmq.auth.CURVE_ALLOW_ANY)
         client_public, client_secret = zmq.curve_keypair()
-        # self.client_public, self.client_secret = zmq.auth.load_certificate(self.client_secret_file)
-        # self.server_public, _ = zmq.auth.load_certificate(self.server_public_file)
-        # print(self.server_public)
         server_public = (config.SERVER_PUBLIC_KEY).encode()
-        # print(type(server_public))
         self.client = self.context.socket(zmq.DEALER)
         self.client.curve_secretkey = client_secret
         self.client.curve_publickey = client_public
@@ -98,6 +72,7 @@ class Messenger:
         self.client.setsockopt(zmq.LINGER, 100)
         id = str.encode(self.manifest['robot_id'])
         self.client.setsockopt(zmq.IDENTITY, id)
+        self.lastTime = time.time();
 
         self.client.connect(config.SERVER_ENDPOINT)
 
@@ -122,7 +97,6 @@ class Messenger:
             self.client.disconnect(config.SERVER_ENDPOINT)
             self.client.close()
         self.context.destroy(linger=1)
-        # while(self.aliveTimer.is_alive()):
         self.aliveTimer.cancel()
         try:
             self.aliveTimer.join()
@@ -152,6 +126,9 @@ class Messenger:
         received_message = None
         try:
             received_message = self.client.recv_json(zmq.NOBLOCK)
+            self.lastTime = time.time();
+            # self.state.updateLast(self.manifest['robot_id'], time.time())
+            # print(str(self.state.instance))
             reply = received_message
         except zmq.ZMQError:
             received_message = None
@@ -194,10 +171,9 @@ class Messenger:
         while attempt != 0:
             attempt -= 1
             try:
-                self.client.recv(zmq.NOBLOCK)
-                print("Got handshake.")
+                reply = self.client.recv(zmq.NOBLOCK)
+                print("Got handshake: ", json.loads(reply))
                 self.connected = True
-                self.lastMessageReceivedTimestamp = time.time()
                 self.aliveTimer.start()
                 break
             except zmq.ZMQError:
@@ -217,6 +193,14 @@ class Messenger:
               "timestamp": time.time()
         }
         self.client.send_json(aliveMessage, zmq.NOBLOCK)
+
+    def checkAlive(self):
+        timeNow = time.time()
+        timeout = config.ALIVENESS_TIMEOUT
+        lastTime = self.lastTime
+        if timeNow - lastTime > timeout:
+            print("Error: connection timeout.")
+            self.cleanup();
 
     def is_current(self, timeout=config.REQUEST_TIMEOUT):
         socks = dict(self.poll.poll(timeout))
