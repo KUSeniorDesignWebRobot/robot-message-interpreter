@@ -14,7 +14,7 @@ class ManifestReader(object):
             self.dict = {}
             self.importJson(filepath)
             # self.manifestJson = None
-          
+
         def importJson(self,filepath):
             with open(filepath) as f:
                 contents = f.read()
@@ -35,6 +35,9 @@ class ManifestReader(object):
             else:
                 print("Key not in manifest!!")
                 return None
+
+        def getManifest(self):
+            return self.manifestJson
 
 
 

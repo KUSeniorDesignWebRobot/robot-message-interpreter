@@ -7,6 +7,7 @@ import serial
 
 from ServoMessageManager import ServoMessageManager
 
+
 class Actuator:
     def __init__(self,
                  channel=None,
@@ -14,19 +15,23 @@ class Actuator:
                  defaultValue=0,
                  expirationBehavior="dynamic",
                  _id=None,
-                 speed=1000):
+                 speed=1000,
+                 mock=True):
         if _id is None:
             self.uuid = uuid.uuid4()
         else:
             self.uuid = uuid.UUID(_id)
-        self.servoMessageManager = ServoMessageManager()
+        self.servoMessageManager = None
+        if not mock:
+            self.servoMessageManager = ServoMessageManager()
         self.channel = channel
         self.range = valueRange
         self.defaultValue = defaultValue
         self.speed = speed
         self.expirationBehavior = expirationBehavior
+        self.mock = mock
         self.value = defaultValue
-    
+
     def __str__(self):
         obj = {
             "uuid": self.uuid,
@@ -53,7 +58,7 @@ class Actuator:
     def position(self):
         # TODO: have this query value through ServoMessageManager
         return self._value
-    
+
     @property
     def value(self):
         return self._value
@@ -62,11 +67,13 @@ class Actuator:
     def value(self, value):
         if self.acceptableValue(value):
             # send message to servo if value was updated
-            if not hasattr(self, "_value") or self._value != value:
+            if not self.mock and (not hasattr(self, "_value") or self._value != value):
                 self._value = value
                 message = self.servoMessageManager.getMessage()
                 message.build(channel=self.channel, value=self._value, speed=self.speed)
                 message.send()
+            elif self.mock:
+                self._value = value
         else:
             # TODO: Interpreter should handle exception being thrown
             raise Exception("Value %d is not within acceptable range for actuator %s" % (value, self.uuid))

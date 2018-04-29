@@ -6,6 +6,7 @@ import logging
 import uuid
 
 
+
 class MockActuator:
     def __init__(self,
                  channel=None,
@@ -42,7 +43,7 @@ class MockActuator:
         if "lte" in self.range:
             acceptable &= value <= self.range["lte"]
         return acceptable
-    
+
     @property
     def value(self):
         return self._value

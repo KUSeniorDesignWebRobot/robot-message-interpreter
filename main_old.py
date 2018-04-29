@@ -7,6 +7,7 @@ import argparse
 import sys
 from MockActuator import MockActuator
 from Interpreter import Interpreter
+import config
 
 _LOG_LEVEL_STRINGS = ['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG']
 
@@ -65,7 +66,7 @@ def main():
                     nargs='?',
                     help='Set the logging output level. {0}'.format(_LOG_LEVEL_STRINGS))
     parsed_args = parser.parse_args()
-    logging.basicConfig(filename='\var\log\robot.log', format='%(asctime)s:%(levelname)s:%(message)s', level=parsed_args.log_level)
+    logging.basicConfig(filename='.\\robot.log', format='%(asctime)s:%(levelname)s:%(message)s', level=parsed_args.log_level)
     logging.debug('Started')
     logging.info('Started')
     logging.warning('Started')

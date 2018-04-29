@@ -31,11 +31,13 @@ for spec in actuator_specifications:
         "_id": spec["_id"],
         "valueRange": spec["valueRange"],
         "expirationBehavior": spec["expirationBehavior"],
-        "defaultValue": spec["defaultValue"]
+        "defaultValue": spec["defaultValue"],
+        "mock": True
     }))
 
 
 interpreter = Interpreter(actuators)
+
 
 def main():
     global interpreter
