@@ -40,6 +40,7 @@ def commandMessageManager(manifest):
     #manifest.setVar('testing', True)
 
     actuator_specifications = manifest['actuators']
+    robot_id = manifest['robot_id']
     actuators = []
     for spec in actuator_specifications:
         actuators.append(Actuator(**{
@@ -59,7 +60,8 @@ def commandMessageManager(manifest):
                     time.sleep(0.02)
                     reply = m.recv()
                     if(reply):
-                        print("I: Server replied with message (%s)" % reply)
+                        if(reply['message_type'] != "alive"):
+                            print("I: Server replied with message (%s)" % reply)
                         # last_timestamp = time.time()
                         last_message_id = reply["message_id"]
                         if(reply["message_type"] == "command"):
@@ -73,7 +75,7 @@ def commandMessageManager(manifest):
                             interpreter.interpret(parsed_dict)
                             print("Interpreter sent message")
                             print("SENDING Acknowledgement")
-                            request = {"message_id": last_message_id, "message_type": "acknowledgement","timestamp": time.time()}
+                            request = {"message_id": last_message_id, "message_type": "acknowledgement", "robot_id":robot_id, "timestamp": time.time()}
                             m.send(request)
                 else:
                     print("Exiting")

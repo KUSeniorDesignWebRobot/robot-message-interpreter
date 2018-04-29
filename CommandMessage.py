@@ -171,7 +171,7 @@ class CommandMessage:
         if (valid and 'session_id' in message):
             version = self.__versionUUID(message['session_id'])
             if version:
-                loggin.info("Message has valid session ID")
+                logging.info("Message has valid session ID")
                 pass
             else:
                 raise Exception("Message has invalid session ID")
@@ -206,7 +206,7 @@ class CommandMessage:
                     logging.error("Some instructions in message are invalid.")
         elif(valid):
             raise Exception("Message has invalid instruction type.")
-            loggin.error("Message has invalid instruction type.")
+            logging.error("Message has invalid instruction type.")
             valid = False
 
         return valid

@@ -49,16 +49,7 @@ class Messenger:
         if self.lastMessageReceivedTimestamp - time.time() > config.REQUEST_TIMEOUT:
             print("Error: connection timeout.")
             self.aliveTimer.stop()
-            enablePrint()
-            if(self.is_current(2)):
-                self.client.recv_json(zmq.NOBLOCK)
-            if(self.is_ready_to_send(2)):
-                pass
-            self.auth.stop()
-            while(not self.client.closed):
-                self.client.disconnect(config.SERVER_ENDPOINT)
-                self.client.close()
-            self.context.destroy(linger=1)
+            self.cleanup();
 
     def __init__(self, recv_message_type, send_message_type, manifest):
         self.recv_message_type = recv_message_type
@@ -109,6 +100,9 @@ class Messenger:
         return self
 
     def __exit__(self, exception_type, exception_value, traceback):
+        self.cleanup();
+
+    def cleanup(self):
         enablePrint()
         if(not self.client.closed and self.is_current(2)):
             self.client.recv_json(zmq.NOBLOCK)
@@ -119,6 +113,8 @@ class Messenger:
             self.client.disconnect(config.SERVER_ENDPOINT)
             self.client.close()
         self.context.destroy(linger=1)
+        self.aliveTimer.cancel()
+        self.aliveTimer.join()
 
     def send(self, message):
         print("MESSAGE TYPE IS ", message["message_type"])
@@ -147,7 +143,7 @@ class Messenger:
             received_message = None
         except KeyboardInterrupt:
             received_message = None
-        if(received_message is not None):
+        if(received_message != None):
             if(received_message["message_type"] == "termination"):
                 message = tM
                 self.server_side_termination = True
@@ -181,7 +177,7 @@ class Messenger:
         # received_response = False
         print("Waiting on handshake.")
         attempt = config.REQUEST_RETRIES
-        while attempt is not 0:
+        while attempt != 0:
             attempt -= 1
             try:
                 self.client.recv(zmq.NOBLOCK)
@@ -196,16 +192,7 @@ class Messenger:
                 break
         if(not self.connected):
             print("Error: Didn't receive handshake.  Failed to connect to server after ", str(config.REQUEST_RETRIES), " attempts.")
-            enablePrint()
-            if(self.is_current(2)):
-                self.client.recv_json(zmq.NOBLOCK)
-            if(self.is_ready_to_send(2)):
-                pass
-            self.auth.stop()
-            while(not self.client.closed):
-                self.client.disconnect(config.SERVER_ENDPOINT)
-                self.client.close()
-            self.context.destroy(linger=1)
+            self.cleanup();
         return self.connected
 
     def send_alive_reply(self, received_message):
@@ -216,7 +203,6 @@ class Messenger:
               "timestamp": time.time()
         }
         self.client.send_json(aliveMessage, zmq.NOBLOCK)
-        # print("Alive Reply Message Sent")
 
     def is_current(self, timeout=config.REQUEST_TIMEOUT):
         socks = dict(self.poll.poll(timeout))

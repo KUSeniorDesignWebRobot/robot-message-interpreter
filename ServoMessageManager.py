@@ -28,7 +28,7 @@ class ServoMessageManager(object):
                 self.serial = serial.Serial('/dev/ttyUSB0')
                 if self.serial is None:
                     raise IOError("Serial Connection Failed!")
-                          logging.error("Serial Connection Failed!")
+                    logging.error("Serial Connection Failed!")
             self.stopped = False
             self.target = time.time()
             self.interval = interval
@@ -77,7 +77,7 @@ class ServoMessageManager(object):
                 with self.lock:
                     self.threads.append(timerthread)
 
-        
+
         def getMessage(self):
             return ServoMessage(self)
 
@@ -121,4 +121,3 @@ class ServoMessageManager(object):
         if not ServoMessageManager.instance:
             ServoMessageManager.instance = ServoMessageManager.__ServoMessageManager(interval)
         return ServoMessageManager.instance
-

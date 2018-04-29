@@ -15,7 +15,7 @@ import AcknowledgementMessage as AM
 import ReportMessageGenerator as RMG
 
 #block prints during runtime?
-block = True
+block = False
 
 # Disable
 def blockPrint():
@@ -80,6 +80,7 @@ class Messenger:
 
 
     def __exit__(self, exception_type, exception_value, traceback):
+        print("Helloooo1")
         enablePrint()
         if(self.is_current(1)):
             print("Was current")
