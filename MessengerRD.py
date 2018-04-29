@@ -142,6 +142,7 @@ class Messenger:
         received_message = None
         try:
             received_message = self.client.recv_json(zmq.NOBLOCK)
+            reply = received_message
         except zmq.ZMQError:
             received_message = None
         except KeyboardInterrupt:
@@ -150,16 +151,16 @@ class Messenger:
             if(received_message["message_type"] == "termination"):
                 message = tM
                 self.server_side_termination = True
+            elif(received_message["message_type"] == "handshake"):
+                pass
+            elif(received_message["message_type"] == "alive"):
+                self.send_alive_reply(received_message)
             elif(self.recv_message_type == "command"):
                 message = CM.CommandMessage(received_message)
+                reply = message.json()
             elif(self.recv_message_type == "acknowledgement"):
                 message = AM.AcknowledgementMessage(received_message)
-            elif(self.recv_message_type == "handshake"):
-                pass
-            elif(self.recv_message_type == "alive"):
-                self.client.send_alive_reply(received_message)
-            reply = message.json()
-            logging.debug("I: Server replied with message (%s)" % reply)
+                reply = message.json()
             print("Received Message: \n", reply)
         return reply
 
