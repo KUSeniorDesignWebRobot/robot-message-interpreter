@@ -94,7 +94,7 @@ class Messenger:
         self.context.destroy(linger=1)
         print("closed client")
 
-    def send(self,message):
+    def send(self, message):
         if(not self.is_ready_to_send(timeout=1)):
             print("Not ready to send")
         else:

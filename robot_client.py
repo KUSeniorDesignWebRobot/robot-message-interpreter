@@ -3,7 +3,7 @@ import config
 from Interpreter import Interpreter
 from MockActuator import MockActuator
 import time
-from uuid import UUID
+import uuid
 import logging
 import threading
 from ReportMessageGenerator import ReportMessageGenerator
@@ -43,9 +43,9 @@ def commandMessageManager(actuatorList):
         retries_left = config.REQUEST_RETRIES
         #Example Termination Message
         tM = {
-              "message_id": "067c8c59-710a-4c15-8265-b7f1e49b828c",
+              "message_id": uuid.uuid4(),
               "message_type": "termination",
-              "timestamp": 1509748526.3482552
+              "timestamp": time.time()
         }
         while retries_left > 0:
             try:
@@ -124,7 +124,7 @@ def reportMessageManager():
     #TODO The all-zero UUID is actually invalid.  Need to designate a dummy default UUID value.
     #Maybe just random like a normal message?
     # with Messenger("acknowledgment", "report") as m:
-    #     retries_left = config.REQUEST_RETRIES
+    retries_left = config.REQUEST_RETRIES
     rmg = ReportMessageGenerator()
     print(rmg.is_fresh)
     while retries_left:
