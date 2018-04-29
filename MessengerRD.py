@@ -46,33 +46,37 @@ class OfflineServerError(Exception):
 
 class Messenger:
     def checkAlive(self):
-        if self.lastMessageReceivedTimestamp - time.time() > config.REQUEST_TIMEOUT:
+        lastTime = self.lastMessageReceivedTimestamp
+        timeNow = time.time()
+        timeout = 2.5
+        print("TIMES:(" + str(lastTime) + ", " + str(timeNow) + ", " + str(timeout) + ")")
+        if timeNow - lastTime > timeout:
             print("Error: connection timeout.")
-            self.aliveTimer.stop()
             self.cleanup();
 
     def __init__(self, recv_message_type, send_message_type, manifest):
-        self.recv_message_type = recv_message_type
-        self.send_message_type = send_message_type
-        self.baseDir = os.path.dirname(__file__)
-        self.cert_dir = os.path.join(self.baseDir, 'certs')
-        self.public_key_dir = os.path.join(self.baseDir, 'public_keys')
-        self.secret_key_dir = os.path.join(self.baseDir, 'private_keys')
-        self.server_public_file = os.path.join(self.public_key_dir, "server.key")
-        self.serverPrivateFile = ""
-        self.clientPublicFile = ""
-        self.client_secret_file = os.path.join(self.secret_key_dir, "client.key_secret")
-        self.client_secret_file = os.path.join(self.secret_key_dir, "client.key_secret")
-        self.client_public, self.client_secret = "", ""
-        self.server_public_file = os.path.join(self.public_key_dir, "server.key")
-        self.server_public = ""
+        # self.recv_message_type = recv_message_type
+        # self.send_message_type = send_message_type
+        # self.baseDir = os.path.dirname(__file__)
+        # self.client_secret_file = zmq.auth.create_certificates(".", manifest['robot_id'])[1]
+        # self.cert_dir = os.path.join(self.baseDir, 'certs')
+        # self.public_key_dir = os.path.join(self.baseDir, 'public_keys')
+        # self.secret_key_dir = os.path.join(self.baseDir, 'private_keys')
+        # self.server_public_file = os.path.join(self.public_key_dir, "server.key")
+        # self.serverPrivateFile = ""
+        # self.clientPublicFile = ""
+        # self.client_secret_file = os.path.join(self.secret_key_dir, "client.key_secret")
+        # self.client_secret_file = os.path.join(self.secret_key_dir, "client.key_secret")
+        # self.client_public, self.client_secret = "", ""
+        # self.server_public_file = os.path.join(self.public_key_dir, "server.key")
+        # self.server_public = ""
         self.context = None
         self.auth = None
         self.client = None
         self.server_side_termination = False
         self.connected = False
         self.lastMessageReceivedTimestamp = 0
-        self.aliveTimer = threading.Timer(config.REQUEST_TIMEOUT, self.checkAlive)
+        self.aliveTimer = threading.Timer(2.0, self.checkAlive)
         self.manifest = manifest
 
     def __enter__(self):
@@ -80,13 +84,17 @@ class Messenger:
         self.auth = ThreadAuthenticator(self.context)
         self.auth.start()
         # telling the authenticator to use certs in the directory
-        self.auth.configure_curve(domain='*', location=self.public_key_dir)
-        self.client_public, self.client_secret = zmq.auth.load_certificate(self.client_secret_file)
-        self.server_public, _ = zmq.auth.load_certificate(self.server_public_file)
+        self.auth.configure_curve(domain='robots', location=zmq.auth.CURVE_ALLOW_ANY)
+        client_public, client_secret = zmq.curve_keypair()
+        # self.client_public, self.client_secret = zmq.auth.load_certificate(self.client_secret_file)
+        # self.server_public, _ = zmq.auth.load_certificate(self.server_public_file)
+        # print(self.server_public)
+        server_public = (config.SERVER_PUBLIC_KEY).encode()
+        # print(type(server_public))
         self.client = self.context.socket(zmq.DEALER)
-        self.client.curve_secretkey = self.client_secret
-        self.client.curve_publickey = self.client_public
-        self.client.curve_serverkey = self.server_public
+        self.client.curve_secretkey = client_secret
+        self.client.curve_publickey = client_public
+        self.client.curve_serverkey = server_public
         self.client.setsockopt(zmq.LINGER, 100)
         id = str.encode(self.manifest['robot_id'])
         self.client.setsockopt(zmq.IDENTITY, id)
@@ -103,6 +111,7 @@ class Messenger:
         self.cleanup();
 
     def cleanup(self):
+        self.connected = False
         enablePrint()
         if(not self.client.closed and self.is_current(2)):
             self.client.recv_json(zmq.NOBLOCK)
@@ -113,8 +122,13 @@ class Messenger:
             self.client.disconnect(config.SERVER_ENDPOINT)
             self.client.close()
         self.context.destroy(linger=1)
+        # while(self.aliveTimer.is_alive()):
         self.aliveTimer.cancel()
-        self.aliveTimer.join()
+        try:
+            self.aliveTimer.join()
+        except:
+            pass
+        print("Finished Cleanup")
 
     def send(self, message):
         print("MESSAGE TYPE IS ", message["message_type"])

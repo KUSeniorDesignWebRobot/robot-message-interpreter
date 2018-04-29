@@ -15,3 +15,4 @@ REQUEST_RETRIES = -1
 # ROBOT_ID = "johnny-five"
 MANIFEST_FILENAME = "manifest.json"
 MOCK = True
+SERVER_PUBLIC_KEY = "N@7tEO8coes2iv=YB0+ZdOelzh<b%yn$F6<L^iwQ"

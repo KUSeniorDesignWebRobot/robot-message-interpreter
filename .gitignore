@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# ZMQ Curve Authentication Keys
+*.key
+*.key_secret
+
 # C extensions
 *.so
 
