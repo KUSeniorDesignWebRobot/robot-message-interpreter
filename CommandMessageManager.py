@@ -56,6 +56,7 @@ def commandMessageManager(manifest):
         try:
             if(m.send_handshake()):
                 while m.isConnected():
+                    time.sleep(0.02)
                     reply = m.recv()
                     if(reply):
                         print("I: Server replied with message (%s)" % reply)
