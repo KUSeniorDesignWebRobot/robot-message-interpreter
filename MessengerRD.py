@@ -151,17 +151,20 @@ class Messenger:
             if(received_message["message_type"] == "termination"):
                 message = tM
                 self.server_side_termination = True
+                print("Received Message: \n", reply)
             elif(received_message["message_type"] == "handshake"):
+                print("Received Message: \n", reply)
                 pass
             elif(received_message["message_type"] == "alive"):
                 self.send_alive_reply(received_message)
             elif(self.recv_message_type == "command"):
                 message = CM.CommandMessage(received_message)
                 reply = message.json()
+                print("Received Message: \n", reply)
             elif(self.recv_message_type == "acknowledgement"):
                 message = AM.AcknowledgementMessage(received_message)
                 reply = message.json()
-            print("Received Message: \n", reply)
+                print("Received Message: \n", reply)
         return reply
 
     def send_handshake(self):
@@ -213,7 +216,7 @@ class Messenger:
               "timestamp": time.time()
         }
         self.client.send_json(aliveMessage, zmq.NOBLOCK)
-        print("Alive Reply Message Sent")
+        # print("Alive Reply Message Sent")
 
     def is_current(self, timeout=config.REQUEST_TIMEOUT):
         socks = dict(self.poll.poll(timeout))
