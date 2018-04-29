@@ -48,6 +48,8 @@ class OfflineServerError(Exception):
 
 class Messenger:
     def __init__(self, recv_message_type, send_message_type, manifest):
+        self.recv_message_type = recv_message_type
+        self.send_message_type = send_message_type
         self.context = None
         self.auth = None
         self.client = None
