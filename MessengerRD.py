@@ -144,11 +144,11 @@ class Messenger:
                 pass
             elif(received_message["message_type"] == "alive"):
                 self.send_alive_reply(received_message)
-            elif(self.recv_message_type == "command"):
+            elif(received_message["message_type"] == "command"):
                 message = CM.CommandMessage(received_message)
                 reply = message.json()
                 print("Received Message: \n", reply)
-            elif(self.recv_message_type == "acknowledgement"):
+            elif(received_message["message_type"] == "acknowledgement"):
                 message = AM.AcknowledgementMessage(received_message)
                 reply = message.json()
                 print("Received Message: \n", reply)
