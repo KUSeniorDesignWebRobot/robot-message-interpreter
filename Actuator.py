@@ -71,6 +71,7 @@ class Actuator:
                 self._value = value
                 message = self.servoMessageManager.getMessage()
                 message.build(channel=self.channel, value=self._value, speed=self.speed)
+                print("Sending message: ", str(message))
                 message.send()
             elif self.mock:
                 self._value = value

@@ -32,7 +32,7 @@ for spec in actuator_specifications:
         "valueRange": spec["valueRange"],
         "expirationBehavior": spec["expirationBehavior"],
         "defaultValue": spec["defaultValue"],
-        "mock": True
+        "mock": False
     }))
 
 

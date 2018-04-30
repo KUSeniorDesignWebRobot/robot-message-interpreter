@@ -19,7 +19,7 @@ import uuid
 from RepeatingTimer import RepeatingTimer
 
 # block prints during runtime?
-block = False
+block = True
 
 # Disable
 
@@ -174,7 +174,7 @@ class Messenger:
             attempt -= 1
             try:
                 reply = self.client.recv(zmq.NOBLOCK)
-                print("Got handshake: ", json.loads(reply))
+                print("Got handshake: ", json.loads(reply.decode('utf-8')))
                 self.connected = True
                 self.aliveTimer.start()
                 break

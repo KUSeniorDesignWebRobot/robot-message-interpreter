@@ -1,6 +1,7 @@
 # enforced latency in milliseconds
-latency_ms = 500
-SERVER_ENDPOINT = "tcp://localhost:5555"
+latency_ms = 250
+SERVER_ENDPOINT = "tcp://192.168.0.147:5555"
+# SERVER_ENDPOINT = "tcp://localhost:5555"
 # SERVER_ENDPOINT = "tcp://192.168.0.2:5555"
 # SERVER_ENDPOINT = "tcp://192.168.1.2:5555"
 # SERVER_ENDPOINT = "tcp://10.89.87.48:5555"
@@ -15,5 +16,5 @@ REQUEST_RETRIES = 1000
 # ROBOT_ID = "johnny-five"
 ALIVENESS_TIMEOUT = 2.0
 MANIFEST_FILENAME = "manifest.json"
-MOCK = True
+MOCK = False
 SERVER_PUBLIC_KEY = "N@7tEO8coes2iv=YB0+ZdOelzh<b%yn$F6<L^iwQ"
