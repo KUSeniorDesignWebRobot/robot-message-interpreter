@@ -183,7 +183,7 @@ class CommandMessage:
             valid = False
 
         if (valid and 'timestamp' in message):
-            valid = isinstance(message['timestamp'], float)
+            valid = isinstance(message['timestamp'], (int, float))
             if valid:
                 logging.info("Message has valid timestamp")
                 pass
