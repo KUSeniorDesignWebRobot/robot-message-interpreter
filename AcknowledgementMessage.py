@@ -79,7 +79,7 @@ class AcknowledgementMessage:
 
 
         if (valid and 'timestamp' in message):
-            valid = isinstance(message['timestamp'], float)
+            valid = isinstance(message['timestamp'], (int, float))
             if valid:
                 # print("Message has valid timestamp")
                 pass
