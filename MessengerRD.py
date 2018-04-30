@@ -137,6 +137,7 @@ class Messenger:
         except KeyboardInterrupt:
             received_message = None
         if(received_message != None):
+            print(received_message)
             if(received_message["message_type"] == "termination"):
                 message = tM
                 self.server_side_termination = True
